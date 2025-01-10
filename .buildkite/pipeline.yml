@@ -13,7 +13,7 @@ steps:
     plugins:
       - docker#v5.5.0:
           image: "qnib/pytest"
-      - junit#v3.5.0:
+      - junit-annotations#v2.4.0:
           file_paths: "test-reports/results.xml"
     commands:
       - "mkdir -p test-reports"
