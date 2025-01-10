@@ -7,6 +7,7 @@ steps:
       - "python -m py_compile sources/add2vals.py sources/calc.py"
     artifact_paths:
       - "sources/*.py"
+  - wait
 
   - label: "🧪 Test"
     plugins:
@@ -18,6 +19,7 @@ steps:
     plugins:
       - junit#v3.5.0:
           file_paths: "test-reports/results.xml"
+  - wait
 
   - label: "📦 Deliver"
     plugins:
