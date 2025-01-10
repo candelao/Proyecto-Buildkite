@@ -1,0 +1,32 @@
+
+steps:
+  - label: "🔨 Build"
+    plugins:
+      - docker#v5.5.0:
+          image: "python:3.12.0-alpine3.18"
+    commands:
+      - "python -m py_compile sources/add2vals.py sources/calc.py"
+    artifact_paths:
+      - "sources/*.py"
+
+  - label: "🧪 Test"
+    plugins:
+      - docker#v5.5.0:
+          image: "qnib/pytest"
+    commands:
+      - "mkdir -p test-reports"
+      - "py.test --junit-xml=test-reports/results.xml sources/test_calc.py"
+    plugins:
+      - junit#v3.5.0:
+          file_paths: "test-reports/results.xml"
+
+  - label: "📦 Deliver"
+    plugins:
+      - docker#v5.5.0:
+          image: "cdrx/pyinstaller-linux:python2"
+    commands:
+      - "mkdir -p build dist"
+      - "docker run --rm -v $(pwd)/sources:/src cdrx/pyinstaller-linux:python2 pyinstaller -F sources/add2vals.py"
+      - "docker run --rm -v $(pwd)/sources:/src cdrx/pyinstaller-linux:python2 rm -rf build dist"
+    artifact_paths:
+      - "sources/dist/add2vals"
