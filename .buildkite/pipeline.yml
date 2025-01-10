@@ -1,38 +1,38 @@
 # .buildkite/pipeline.yml
 steps:
-  - label: "Build"
+  - label: ":construction_worker: Build"
+    command: |
+      python -m py_compile sources/add2vals.py sources/calc.py
+      ls sources/__pycache__  # Verificar los archivos compilados
     plugins:
-      - docker#v3.12.0:
-          image: "python:3.12.0-alpine3.18"
-    command:
-      - "python -m py_compile sources/add2vals.py sources/calc.py"
-    artifact_paths:
-      - "sources/*.py*"
+      - docker#v3.8.0:
+          image: "python:3.12.1-alpine3.19"
+          always_pull: true
+          workdir: "/workdir"
+    artifact_paths: "sources/*.py*"
+  - wait
 
-  - label: "Test"
+  - label: ":white_check_mark: Test"
+    command: "py.test --junit-xml test-reports/results.xml sources/test_calc.py"
     plugins:
-      - docker#v3.12.0:
+      - docker#v3.8.0:
           image: "qnib/pytest"
-    command:
-      - |
-        py.test --junit-xml test-reports/results.xml sources/test_calc.py || true
-    artifact_paths:
-      - "test-reports/results.xml"
+          always_pull: true
+          workdir: "/workdir"
+  - wait
 
-  - label: "Deliver"
+  - label: ":rocket: Deliver"
+    command: |
+      python -m py_compile sources/add2vals.py  # Compilar add2vals.py
+      ls sources/__pycache__  # Verificar que los archivos .pyc se generaron
+      mkdir -p /workdir/deliver
+      cp sources/__pycache__/add2vals* /workdir/deliver/  # Copiar el ejecutable compilado
     plugins:
-      - docker#v3.12.0:
-          image: "cdrx/pyinstaller-linux:python2"
-    command:
-      - |
-        mkdir -p build-output
-        mv sources/*.py* build-output/
-        cp sources/add2vals.py build-output/
-        docker run --rm -v $(pwd)/build-output:/sources cdrx/pyinstaller-linux:python2 /bin/sh -c "pyinstaller --onefile --noconfirm /sources/add2vals.py"
-        mv build-output/dist/add2vals build-output/
-    artifact_paths:
-      - "build-output/dist/add2vals"
-
+      - docker#v3.8.0:
+          image: "python:3.12.1-alpine3.19"
+          always_pull: true
+          workdir: "/workdir"
+    artifact_paths: "/workdir/deliver/*"  # Asegúrate de que los artefactos estén en el directorio correcto
   - wait
 
 
