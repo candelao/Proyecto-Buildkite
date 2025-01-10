@@ -23,9 +23,12 @@ steps:
       - docker#v3.12.0:
           image: "cdrx/pyinstaller-linux:python2"
     command:
-      - mkdir -p build-output
-      - mv sources/*.py* build-output
-      - "docker run --rm -v $(pwd)/build-output:/src cdrx/pyinstaller-linux:python2 pyinstaller -F add2vals.py"
+      - |
+        mkdir -p build-output
+        mv sources/*.py* build-output/
+        cp sources/add2vals.py build-output/
+        docker run --rm -v $(pwd)/build-output:/src cdrx/pyinstaller-linux:python2 /bin/sh -c "pyinstaller --onefile /src/add2vals.py"
+        mv build-output/dist/add2vals build-output/
     artifact_paths:
       - "build-output/dist/add2vals"
 
