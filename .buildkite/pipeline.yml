@@ -1,35 +1,33 @@
 steps:
-  - label: ":construction_worker: Build"
-    command: "python -m py_compile sources/add2vals.py sources/calc.py"
+  - label: "🔨 Build"
     plugins:
       - docker#v5.5.0:
           image: "python:3.12.0-alpine3.18"
-          always_pull: true
-          workdir: "/workdir"
-    artifact_paths: "sources/*.py*"
+    commands:
+      - "python -m py_compile sources/add2vals.py sources/calc.py"
+    artifact_paths:
+      - "sources/*.py"
 
-  - wait
-
-  - label: ":white_check_mark: Test"
-    command: "py.test --junit-xml test-reports/results.xml sources/test_calc.py"
+  - label: "🧪 Test"
     plugins:
       - docker#v5.5.0:
           image: "qnib/pytest"
-          always_pull: true
-          workdir: "/workdir"
+    commands:
+      - "mkdir -p test-reports"
+      - "py.test --junit-xml=test-reports/results.xml sources/test_calc.py"
+    plugins:
+      - junit#v3.5.0:
+          file_paths: "test-reports/results.xml"
 
-  - wait
-
-  - label: ":rocket: Deliver"
-    command: |
-      python -m py_compile sources/add2vals.py  # Compila add2vals.py
-      ls sources/__pycache__
-      mkdir -p /workdir/deliver
-      cp sources/__pycache__/add2vals* /workdir/deliver/  # Copia el ejecutable compilado
+  - label: "📦 Deliver"
     plugins:
       - docker#v5.5.0:
-          image: "python:3.12.0-alpine3.18"
-          always_pull: true
-          workdir: "/workdir"
-    artifact_paths: "deliver/*"
+          image: "cdrx/pyinstaller-linux:python2"
+    commands:
+      - "mkdir -p build dist"
+      - "docker run --rm -v $(pwd)/sources:/src cdrx/pyinstaller-linux:python2 pyinstaller -F sources/add2vals.py"
+      - "docker run --rm -v $(pwd)/sources:/src cdrx/pyinstaller-linux:python2 rm -rf build dist"
+    artifact_paths:
+      - "sources/dist/add2vals"
+
 
