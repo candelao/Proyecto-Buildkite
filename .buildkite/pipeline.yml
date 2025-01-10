@@ -2,37 +2,45 @@
 steps:
   - label: ":construction_worker: Build"
     command: |
+      echo "Compiling Python files..."
       python -m py_compile sources/add2vals.py sources/calc.py
-      ls sources/__pycache__  # Verificar los archivos compilados
+      echo "Compilation done, listing compiled files:"
+      ls -la sources/__pycache__  # Verificar los archivos .pyc generados
     plugins:
       - docker#v3.8.0:
           image: "python:3.12.1-alpine3.19"
           always_pull: true
-          workdir: "/workdir"
+          workdir: "/build"
     artifact_paths: "sources/*.py*"
   - wait
 
   - label: ":white_check_mark: Test"
-    command: "py.test --junit-xml test-reports/results.xml sources/test_calc.py"
+    command: |
+      echo "Running tests..."
+      py.test --junit-xml test-reports/results.xml sources/test_calc.py
     plugins:
       - docker#v3.8.0:
           image: "qnib/pytest"
           always_pull: true
-          workdir: "/workdir"
+          workdir: "/tests"
+    artifact_paths: "test-reports/results.xml"
   - wait
 
   - label: ":rocket: Deliver"
     command: |
-      python -m py_compile sources/add2vals.py  # Compilar add2vals.py
-      ls sources/__pycache__  # Verificar que los archivos .pyc se generaron
-      mkdir -p /workdir/deliver
-      cp sources/__pycache__/add2vals* /workdir/deliver/  # Copiar el ejecutable compilado
+      echo "Compiling add2vals.py..."
+      python -m py_compile sources/add2vals.py  # Compila add2vals.py
+      echo "Compiled files are in __pycache__"
+      ls -la sources/__pycache__
+      echo "Preparing deliverables..."
+      mkdir -p /dist
+      cp sources/__pycache__/add2vals* /dist/  # Copiar los archivos compilados
     plugins:
       - docker#v3.8.0:
           image: "python:3.12.1-alpine3.19"
           always_pull: true
-          workdir: "/workdir"
-    artifact_paths: "/workdir/deliver/*"  # Asegúrate de que los artefactos estén en el directorio correcto
+          workdir: "/dist"
+    artifact_paths: "/dist/*"  # Asegúrate de que los artefactos estén en el directorio correcto
   - wait
 
 
