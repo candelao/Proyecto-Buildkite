@@ -1,6 +1,6 @@
 # .buildkite/pipeline.yml
 steps:
-  - label: ":construction_worker: Build"
+  - label: "  ⚒️ Build"
     command: |
       echo "Compiling Python files..."
       python -m py_compile sources/add2vals.py sources/calc.py
@@ -14,7 +14,7 @@ steps:
     artifact_paths: "sources/*.py*"
   - wait
 
-  - label: ":white_check_mark: Test"
+  - label: "🧪 Test"
     command: |
       echo "Running tests..."
       py.test --junit-xml test-reports/results.xml sources/test_calc.py
@@ -26,7 +26,7 @@ steps:
     artifact_paths: "test-reports/results.xml"
   - wait
 
-  - label: ":rocket: Deliver"
+  - label: "📨 Deliver"
     command: |
       echo "Compiling add2vals.py..."
       python -m py_compile sources/add2vals.py  # Compila add2vals.py
