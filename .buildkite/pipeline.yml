@@ -28,7 +28,7 @@ steps:
         mkdir -p build-output
         mv sources/*.py* build-output/
         cp sources/add2vals.py build-output/
-        docker run --rm -v $(pwd)/build-output:/sources cdrx/pyinstaller-linux:python2 /bin/sh -c "pyinstaller --onefile /sources/add2vals.py"
+        docker run --rm -v $(pwd)/build-output:/sources cdrx/pyinstaller-linux:python2 /bin/sh -c "pyinstaller --onefile --noconfirm /sources/add2vals.py"
         mv build-output/dist/add2vals build-output/
     artifact_paths:
       - "build-output/dist/add2vals"
