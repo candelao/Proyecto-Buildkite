@@ -2,8 +2,8 @@ steps:
     - label: ":construction_worker: Build"
         command: "python -m py_compile sources/add2vals.py sources/calc.py"
         plugins:
-          - docker#v3.8.0:
-            image: "python:3.12.1-alpine3.19"
+          - docker#v5.5.0:
+            image: "python:3.12.0-alpine3.18"
             always_pull: true
             workdir: "/workdir"
         artifact_paths: "sources/*.py*"
@@ -12,7 +12,7 @@ steps:
     - label: ":white_check_mark: Test"
         command: "py.test --junit-xml test-reports/results.xml sources/test_calc.py"
         plugins:
-          - docker#v3.8.0:
+          - docker#v5.5.0:
             image: "qnib/pytest"
             always_pull: true
             workdir: "/workdir"
@@ -25,8 +25,8 @@ steps:
                 mkdir -p /workdir/deliver
                 cp sources/__pycache__/add2vals* /workdir/deliver/  # Copia el ejecutable compilado
         plugins:
-          - docker#v3.8.0:
-            image: "python:3.12.1-alpine3.19"
+          - docker#v5.5.0:
+            image: "python:3.12.0-alpine3.18"
             always_pull: true
             workdir: "/workdir"
         artifact_paths: "deliver/*"
